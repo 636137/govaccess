@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GovAccess - Accessibility Profile</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 800px; 
+      margin: 50px auto; 
+      padding: 20px;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    h1 { color: #005ea2; }
+    label { display: block; margin: 15px 0 5px; font-weight: bold; }
+    input[type="checkbox"] { width: 20px; height: 20px; margin-right: 10px; }
+    .checkbox-group { margin: 10px 0; }
+    button { 
+      background: #005ea2; 
+      color: white; 
+      padding: 15px 30px; 
+      border: none; 
+      cursor: pointer; 
+      font-size: 18px;
+      margin-top: 20px;
+    }
+    button:hover { background: #004577; }
+    button:focus { outline: 3px solid #ffc107; }
+    .recommendations { 
+      margin-top: 30px; 
+      padding: 20px; 
+      background: #f5f5f5; 
+      border-left: 5px solid #005ea2;
+    }
+    .rec-item { 
+      margin: 15px 0; 
+      padding: 15px; 
+      background: white; 
+      border-radius: 5px;
+    }
+    .priority-high { border-left: 4px solid #d32f2f; }
+    .priority-medium { border-left: 4px solid #ffa000; }
+  </style>
+</head>
+<body>
+  <h1>♿ GovAccess</h1>
+  <p>Create your accessibility profile to get personalized recommendations</p>
+  
+  <form id="profileForm">
+    <label>Select your accessibility needs:</label>
+    
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" name="disability" value="visual">
+        Visual (blind, low vision, color blind)
+      </label>
+    </div>
+    
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" name="disability" value="hearing">
+        Hearing (deaf, hard of hearing)
+      </label>
+    </div>
+    
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" name="disability" value="motor">
+        Motor (limited mobility, tremors)
+      </label>
+    </div>
+    
+    <div class="checkbox-group">
+      <label>
+        <input type="checkbox" name="disability" value="cognitive">
+        Cognitive (learning disabilities, memory issues)
+      </label>
+    </div>
+    
+    <button type="submit">Get Recommendations</button>
+  </form>
+  
+  <div id="recommendations" style="display: none;"></div>
+  
+  <script>
+    document.getElementById('profileForm').onsubmit = async (e) => {
+      e.preventDefault();
+      
+      const checkboxes = document.querySelectorAll('input[name="disability"]:checked');
+      const disabilities = Array.from(checkboxes).map(cb => cb.value);
+      
+      if (disabilities.length === 0) {
+        alert('Please select at least one accessibility need');
+        return;
+      }
+      
+      const res = await fetch('http://localhost:3005/api/recommendations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ disabilities })
+      });
+      
+      const data = await res.json();
+      displayRecommendations(data.recommendations);
+    };
+    
+    function displayRecommendations(recs) {
+      const div = document.getElementById('recommendations');
+      let html = '<h2>Your Personalized Recommendations</h2>';
+      
+      recs.forEach(rec => {
+        html += `
+          <div class="rec-item priority-${rec.priority}">
+            <h3>${rec.feature}</h3>
+            <p>${rec.description}</p>
+            <small>Priority: ${rec.priority.toUpperCase()}</small>
+          </div>
+        `;
+      });
+      
+      div.innerHTML = html;
+      div.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
