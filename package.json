@@ -4,5 +4,6 @@
   "description": "Accessibility profile and accommodation platform",
   "scripts": {
     "dev": "cd backend && node server.js"
-  }
+  },
+  "license": "UNLICENSED"
 }
